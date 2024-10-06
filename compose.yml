@@ -1,0 +1,9 @@
+services:
+  http-exporter:
+    image: ghcr.io/topi314/http-exporter:master
+    container_name: http-exporter
+    restart: unless-stopped
+    volumes:
+      - ./config.toml:/var/lib/http-exporter/config.toml
+    ports:
+      - 2112:2112

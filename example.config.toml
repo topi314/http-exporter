@@ -1,0 +1,25 @@
+[global]
+scrape_interval = "1m"
+scrape_timeout = "10s"
+
+[log]
+level = "info"
+format = "text"
+add_source = false
+
+[server]
+listen_addr = ":2112"
+endpoint = "/metrics"
+
+[[configs]]
+name = "Example"
+type = "http-temp"
+interval = "1m"
+timeout = "10s"
+
+[configs.options]
+metric = { name = "bla_temp", help = "Temperature in celsius", labels = { name = "bla" } }
+address = "hostname:port"
+insecure = true
+username = "user"
+password = "password"
