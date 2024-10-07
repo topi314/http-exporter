@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"golang.org/x/exp/maps"
 
 	"github.com/topi314/prometheus-collectors/internal/xtoml"
@@ -29,7 +28,7 @@ func newHTTPTemp(cfg Config, logger *slog.Logger) (Exporter, error) {
 		return nil, fmt.Errorf("unmarshal options: %w", err)
 	}
 
-	gauge := promauto.NewGaugeVec(prometheus.GaugeOpts{
+	gauge := getOrCreateGauge(prometheus.GaugeOpts{
 		Name: opts.Metric.Name,
 		Help: opts.Metric.Help,
 	}, maps.Keys(opts.Metric.Labels))
