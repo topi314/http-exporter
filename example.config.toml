@@ -23,3 +23,22 @@ address = "hostname:port"
 insecure = true
 username = "user"
 password = "password"
+
+[[configs]]
+name = "Example2"
+type = "http-weather"
+interval = "1m"
+timeout = "10s"
+
+[configs.options]
+address = "hostname:port"
+insecure = true
+username = ""
+password = ""
+
+[configs.options.metrics]
+temperature0 = { name = "bla_temp", help = "Temperature in celsius", labels = { name = "bla2" } }
+temperature1 = { name = "bla_temp", help = "Temperature in celsius", labels = { name = "bla3" } }
+temperature2 = { name = "bla_temp", help = "Temperature in celsius", labels = { name = "bla4" } }
+humidity = { name = "bla_humidity", help = "Humidity in percent", labels = { name = "bla2" } }
+pressure = { name = "bla_pressure", help = "Pressure in hPa", labels = { name = "bla2" } }

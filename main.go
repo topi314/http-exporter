@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"golang.org/x/exp/slog"
 )
 
 var (
@@ -26,6 +26,11 @@ func main() {
 	cfg, err := loadConfig(*cfgPath)
 	if err != nil {
 		slog.Error("Failed to load config", slog.Any("err", err))
+		return
+	}
+	slog.Info("Loaded config", slog.String("config", cfg.String()))
+	if err = cfg.Validate(); err != nil {
+		slog.Error("Invalid config", slog.Any("err", err))
 		return
 	}
 

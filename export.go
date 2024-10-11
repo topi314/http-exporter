@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"sync"
 	"time"
@@ -10,6 +11,8 @@ import (
 )
 
 func startExporters(ctx context.Context, cfg Config) {
+	slog.DebugContext(ctx, "starting exporters")
+
 	var wg sync.WaitGroup
 	for i := range cfg.Configs {
 		wg.Add(1)
@@ -37,14 +40,19 @@ func startExporters(ctx context.Context, cfg Config) {
 }
 
 func collect(ctx context.Context, logger *slog.Logger, cfg exporters.Config) {
+	slog.DebugContext(ctx, "starting exporter", slog.String("name", cfg.Name))
 	exporter, err := exporters.New(cfg, logger)
 	if err != nil {
-		logger.Error("failed to create exporter", slog.Any("err", err))
+		if errors.Is(err, exporters.ErrExporterNotFound) {
+			slog.ErrorContext(ctx, "exporter type not found", slog.String("type", cfg.Type))
+			return
+		}
+		logger.ErrorContext(ctx, "failed to create exporter", slog.Any("err", err))
 		return
 	}
 	defer func() {
 		if closeErr := exporter.Close(); closeErr != nil {
-			logger.Error("failed to close exporter", slog.Any("err", closeErr))
+			logger.ErrorContext(ctx, "failed to close exporter", slog.Any("err", closeErr))
 		}
 	}()
 

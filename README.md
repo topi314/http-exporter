@@ -24,7 +24,7 @@ services:
     volumes:
       - ./config.toml:/var/lib/http-exporter/config.toml
     ports:
-      - 2112:2112
+      - "2112:2112"
 ```
 
 ## Configuration
