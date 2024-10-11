@@ -2,6 +2,7 @@ package exporters
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -25,7 +26,11 @@ func init() {
 func newHTTPTemp(cfg Config, logger *slog.Logger) (Exporter, error) {
 	var opts httpTempOptions
 	if err := xtoml.UnmarshalMap(cfg.Options, &opts); err != nil {
-		return nil, fmt.Errorf("unmarshal options: %w", err)
+		return nil, fmt.Errorf("unmarshal http temp options: %w", err)
+	}
+
+	if err := opts.Validate(); err != nil {
+		return nil, fmt.Errorf("validate http temp options: %w", err)
 	}
 
 	gauge := getOrCreateGauge(prometheus.GaugeOpts{
@@ -106,7 +111,7 @@ func (e *httpTempExporter) Close() error {
 }
 
 type httpTempOptions struct {
-	Metric httpMetricConfig `toml:"metric"`
+	Metric metricConfig `toml:"metric"`
 
 	Address  string `toml:"address"`
 	Insecure bool   `toml:"insecure"`
@@ -114,8 +119,23 @@ type httpTempOptions struct {
 	Password string `toml:"password"`
 }
 
-type httpMetricConfig struct {
-	Name   string            `toml:"name"`
-	Help   string            `toml:"help"`
-	Labels map[string]string `toml:"labels"`
+func (o httpTempOptions) Validate() error {
+	var errs []error
+	if o.Address == "" {
+		errs = append(errs, fmt.Errorf("address is required"))
+	}
+	if err := o.Metric.Validate(); err != nil {
+		errs = append(errs, fmt.Errorf("metric: %w", err))
+	}
+	return errors.Join(errs...)
+}
+
+func (o httpTempOptions) String() string {
+	return fmt.Sprintf("\n address: %s\n insecure: %t\n username: %s\n password: %s\n metric: %s",
+		o.Address,
+		o.Insecure,
+		o.Username,
+		strings.Repeat("*", len(o.Password)),
+		o.Metric,
+	)
 }
